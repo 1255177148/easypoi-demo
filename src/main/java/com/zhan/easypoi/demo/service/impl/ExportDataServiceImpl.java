@@ -41,7 +41,8 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
         RtfWriter2.getInstance(doc, new FileOutputStream(fileName));
         doc.open();
         for (String barcode : barcodes){
-            Image image = Image.getInstance(imageToBytes(BarCodeUtil.getBarCode(barcode)));
+            BufferedImage bufferedImage = BarCodeUtil.getBarCode(barcode);
+            Image image = Image.getInstance(imageToBytes(BarCodeUtil.insertWords(bufferedImage, barcode)));
             image.setSpacingAfter(20);
             image.setSpacingBefore(20);
             doc.add(image);
