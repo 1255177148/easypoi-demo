@@ -48,6 +48,7 @@ class DemoApplicationTests {
         Long start = System.currentTimeMillis();
         ExportParams exportParams = new ExportParams("导出测试\n课程", "测试");
         exportParams.setStyle(ExcelStyleUtil.class);
+        exportParams.setTitleHeight((short)20);
         Workbook workbook = ExcelExportUtil.exportExcel(exportParams, CourseEntity.class, courseEntities);
         Long end = System.currentTimeMillis();
         System.out.println("耗时：" + (end-start) + "ms");
