@@ -99,13 +99,13 @@ public class BarCodeUtil {
 
 
     /** 条形码宽度 */
-    private static final int WIDTH = 325;
+    private static final int WIDTH = 290;
 
     /** 条形码高度 */
     private static final int HEIGHT = 50;
 
     /** 加文字 条形码 */
-    private static final int WORDHEIGHT = 75;
+    private static final int WORDHEIGHT = 180;
 
     /**
      * 设置 条形码参数
@@ -163,15 +163,21 @@ public class BarCodeUtil {
             g2d.setColor(color);
             // 字体、字型、字号
             g2d.setFont(new Font("微软雅黑", Font.PLAIN, 18));
-            //文字长度
-            int strWidth = g2d.getFontMetrics().stringWidth(words);
-            //总长度减去文字长度的一半  （居中显示）
-            int wordStartX=(WIDTH - strWidth) / 2;
-            //height + (outImage.getHeight() - height) / 2 + 12
-            int wordStartY=HEIGHT+20;
 
             // 画文字
-            g2d.drawString(words, wordStartX, wordStartY);
+            String[] insertWords = words.split("\n");
+            for (int i=0;i<insertWords.length;i++){
+                //文字长度
+                int strWidth = g2d.getFontMetrics().stringWidth(insertWords[i]);
+                //总长度减去文字长度的一半  （居中显示）
+                int wordStartX=(WIDTH - strWidth) / 2;
+                //height + (outImage.getHeight() - height) / 2 + 12
+                int wordStartY=HEIGHT+20;
+                if (i > 0){
+                    wordStartY = wordStartY + 20;
+                }
+                g2d.drawString(insertWords[i], wordStartX, wordStartY);
+            }
             g2d.dispose();
             outImage.flush();
             return outImage;

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -19,7 +20,7 @@ public class TestController {
     private ExportDataService exportDataService;
 
     @GetMapping("/test/export")
-    public void export() throws IOException, DocumentException {
-        exportDataService.exportWordWithImage();
+    public void export(HttpServletResponse response) throws IOException, DocumentException {
+        exportDataService.exportWordWithImage(response);
     }
 }
