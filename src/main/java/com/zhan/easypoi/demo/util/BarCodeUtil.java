@@ -29,10 +29,40 @@ import java.util.Map;
 
 /**
  * 条形码工具类
+ *
  * @Author elvis
  * @Date 2021/7/2 15:25
  */
 public class BarCodeUtil {
+
+    /**
+     * 条形码宽度
+     */
+    private static final int WIDTH = 260;
+
+
+    /**
+     * 加文字 条形码
+     */
+    private static final int WORD_HEIGHT = 180;
+
+    /**
+     * 条形码高度
+     */
+    private static final int HEIGHT = (int) (WORD_HEIGHT / 2 * 0.56);
+
+    /**
+     * 设置 条形码参数
+     */
+    private static Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>() {
+        private static final long serialVersionUID = 1L;
+
+        {
+            // 设置编码方式
+            put(EncodeHintType.CHARACTER_SET, "utf-8");
+        }
+    };
+
     /**
      * 生成code128条形码
      *
@@ -77,10 +107,11 @@ public class BarCodeUtil {
 
     /**
      * 解析读取条形码
+     *
      * @param barcodePath 条形码文件路径
      * @return
      */
-    public static String decodeBarcode(String barcodePath){
+    public static String decodeBarcode(String barcodePath) {
         BufferedImage image;
         Result result = null;
         try {
@@ -97,34 +128,14 @@ public class BarCodeUtil {
         return null;
     }
 
-
-    /** 条形码宽度 */
-    private static final int WIDTH = 290;
-
-    /** 条形码高度 */
-    private static final int HEIGHT = 50;
-
-    /** 加文字 条形码 */
-    private static final int WORDHEIGHT = 180;
-
-    /**
-     * 设置 条形码参数
-     */
-    private static Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>() {
-        private static final long serialVersionUID = 1L;
-        {
-            // 设置编码方式
-            put(EncodeHintType.CHARACTER_SET, "utf-8");
-        }
-    };
-
     /**
      * 生成 图片缓冲
-     * @author fxbin
-     * @param vaNumber  VA 码
+     *
+     * @param vaNumber VA 码
      * @return 返回BufferedImage
+     * @author fxbin
      */
-    public static BufferedImage getBarCode(String vaNumber){
+    public static BufferedImage getBarCode(String vaNumber) {
         try {
             Code128Writer writer = new Code128Writer();
             // 编码内容, 编码类型, 宽度, 高度, 设置参数
@@ -138,16 +149,17 @@ public class BarCodeUtil {
 
     /**
      * 把带logo的条形码下面加上文字
-     * @author fxbin
-     * @param image  条形码图片
-     * @param words  文字
+     *
+     * @param image 条形码图片
+     * @param words 文字
      * @return 返回BufferedImage
+     * @author fxbin
      */
-    public static BufferedImage insertWords(BufferedImage image, String words){
+    public static BufferedImage insertWords(BufferedImage image, String words) {
         // 新的图片，把带logo的二维码下面加上文字
         if (StringUtils.isNotEmpty(words)) {
 
-            BufferedImage outImage = new BufferedImage(WIDTH, WORDHEIGHT, BufferedImage.TYPE_INT_RGB);
+            BufferedImage outImage = new BufferedImage(WIDTH, WORD_HEIGHT, BufferedImage.TYPE_INT_RGB);
 
             Graphics2D g2d = outImage.createGraphics();
 
@@ -159,22 +171,22 @@ public class BarCodeUtil {
             // 画条形码到新的面板
             g2d.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
             // 画文字到新的面板
-            Color color=new Color(0, 0, 0);
+            Color color = new Color(0, 0, 0);
             g2d.setColor(color);
             // 字体、字型、字号
             g2d.setFont(new Font("微软雅黑", Font.PLAIN, 18));
 
             // 画文字
             String[] insertWords = words.split("\n");
-            for (int i=0;i<insertWords.length;i++){
+            for (int i = 0; i < insertWords.length; i++) {
                 //文字长度
                 int strWidth = g2d.getFontMetrics().stringWidth(insertWords[i]);
                 //总长度减去文字长度的一半  （居中显示）
-                int wordStartX=(WIDTH - strWidth) / 2;
+                int wordStartX = (WIDTH - strWidth) / 2;
                 //height + (outImage.getHeight() - height) / 2 + 12
-                int wordStartY=HEIGHT+20;
-                if (i > 0){
-                    wordStartY = wordStartY + 20;
+                int wordStartY = HEIGHT + (WORD_HEIGHT / 2 - HEIGHT) / 2;
+                if (i > 0) {
+                    wordStartY = wordStartY + (WORD_HEIGHT / 2 - HEIGHT) / 2;
                 }
                 g2d.drawString(insertWords[i], wordStartX, wordStartY);
             }
@@ -187,9 +199,10 @@ public class BarCodeUtil {
 
     /**
      * 设置 Graphics2D 属性  （抗锯齿）
-     * @param g2d  Graphics2D提供对几何形状、坐标转换、颜色管理和文本布局更为复杂的控制
+     *
+     * @param g2d Graphics2D提供对几何形状、坐标转换、颜色管理和文本布局更为复杂的控制
      */
-    private static void setGraphics2D(Graphics2D g2d){
+    private static void setGraphics2D(Graphics2D g2d) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT);
         Stroke s = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER);
@@ -198,12 +211,13 @@ public class BarCodeUtil {
 
     /**
      * 设置背景为白色
+     *
      * @param g2d Graphics2D提供对几何形状、坐标转换、颜色管理和文本布局更为复杂的控制
      */
-    private static void setColorWhite(Graphics2D g2d){
+    private static void setColorWhite(Graphics2D g2d) {
         g2d.setColor(Color.WHITE);
         //填充整个屏幕
-        g2d.fillRect(0,0,600,600);
+        g2d.fillRect(0, 0, 600, 600);
         //设置笔刷
         g2d.setColor(Color.BLACK);
     }

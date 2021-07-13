@@ -33,13 +33,15 @@ import java.util.stream.Collectors;
 @Service
 public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportDataEntity> implements ExportDataService {
 
+    private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";// 中文正则
+
     @Override
     public void exportWordWithImage(HttpServletResponse response) throws IOException, DocumentException {
         List<ExportDataEntity> exportDataEntityList = list();
         List<String> barcodes = exportDataEntityList.stream().map(ExportDataEntity::getBarcodeNumber).collect(Collectors.toList());
         String fileName = "test";
         Document doc = new Document(PageSize.A4);
-        doc.setMargins(0,0,50,0);
+        doc.setMargins(5,0,50,0);
         /**
          * 建立一个书写器与document对象关联,通过书写器可以将文档写入到输出流中
          */
@@ -49,12 +51,13 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
         int total = barcodes.size();
         int number = 1;
         for (String barcode : barcodes){
+            barcode = barcode.replaceAll(REGEX_CHINESE, "");
             BufferedImage bufferedImage = BarCodeUtil.getBarCode(barcode);
             String insertWord = barcode + "\n" + number + "/" + total;
             number++;
             Image image = Image.getInstance(imageToBytes(BarCodeUtil.insertWords(bufferedImage, insertWord)));
-            image.setSpacingAfter(20);
-            image.setSpacingBefore(20);
+//            image.setSpacingAfter(20);
+//            image.setSpacingBefore(20);
             doc.add(image);
             Paragraph paragraph = new Paragraph("\n");
             doc.add(paragraph);
