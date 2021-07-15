@@ -67,7 +67,9 @@
         <dependency>
             <groupId>com.aspose</groupId>
             <artifactId>aspose-words</artifactId>
-            <version>1.0.3</version>
+            <version>15.8.0-jdk16</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/aspose-words-15.8.0-jdk16.jar</systemPath>
         </dependency>
 
         <!-- 生成条形码工具类 -->

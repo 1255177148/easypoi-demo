@@ -115,6 +115,8 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
         while (rows.hasNext()){
             row = rows.next();
             if (row.getRowNum() < 2){
+                String rowValue = getRealType(row.getCell(1));
+                System.out.println(rowValue);
                 continue;
             }
             Cell cell1 = row.getCell(0);
