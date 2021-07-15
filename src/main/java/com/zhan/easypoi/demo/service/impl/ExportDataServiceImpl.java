@@ -1,5 +1,9 @@
 package com.zhan.easypoi.demo.service.impl;
 
+import cn.afterturn.easypoi.excel.ExcelImportUtil;
+import cn.afterturn.easypoi.excel.entity.ImportParams;
+import cn.afterturn.easypoi.excel.entity.result.ExcelImportResult;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -12,6 +16,13 @@ import com.zhan.easypoi.demo.mapper.ExportDataMapper;
 import com.zhan.easypoi.demo.service.ExportDataService;
 import com.zhan.easypoi.demo.util.BarCodeUtil;
 import com.zhan.easypoi.demo.util.WordToPdfUtil;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -19,11 +30,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +83,75 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
         WordToPdfUtil.doc2pdf(in, response.getOutputStream());
     }
 
+    @Override
+    public void testImport() throws Exception {
+        String filePath = "D:\\test.xlsx";
+        ImportParams params = new ImportParams();
+        params.setHeadRows(2);
+        params.setReadSingleCell(true);
+        ExcelImportResult<Map> list = ExcelImportUtil.importExcelMore(new File(filePath), Map.class, params);
+        Map<String, Object> map = list.getMap();
+        System.out.println(JSON.toJSONString(map));
+
+        InputStream inputStream = new FileInputStream(filePath);
+        Workbook workbook = null;
+        if (filePath.endsWith(".xlsx")) {
+            workbook = new XSSFWorkbook(inputStream);
+        } else if (filePath.endsWith(".xls") || filePath.endsWith(".et")) {
+            workbook = new HSSFWorkbook(inputStream);
+        }
+        inputStream.close();
+        /**
+         * 使用poi读取excel内容
+         */
+        Sheet sheet = workbook.getSheetAt(0);
+        Iterator<Row> rows = sheet.rowIterator();
+        Row row;
+        Cell cell;
+        boolean rowStart = false;
+        boolean rowStart1= false;
+        boolean rowStart2 = false;
+        int jumpNum = 0;
+        while (rows.hasNext()){
+            row = rows.next();
+            if (row.getRowNum() < 2){
+                continue;
+            }
+            Cell cell1 = row.getCell(0);
+            String value = getRealType(cell1);
+            if ("学生1".equals(value)){
+                rowStart = true;
+                rowStart1= false;
+                rowStart2 = false;
+                jumpNum = 2;
+            } else if ("学生2".equals(value)){
+                rowStart = false;
+                rowStart1= true;
+                rowStart2 = false;
+                jumpNum = 2;
+            } else if ("箱货信息".equals(value)){
+                rowStart = false;
+                rowStart1= false;
+                rowStart2 = true;
+                jumpNum = 2;
+            }
+            if (jumpNum != 0 && jumpNum > 0){
+                jumpNum--;
+                continue;
+            }
+            // 获取每行的单元格
+            Iterator<Cell> cells = row.cellIterator();
+            int num = 0;
+            while (cells.hasNext()){
+                if (rowStart || rowStart1 || rowStart2){
+                    cell = cells.next();
+                    String cellValue = getRealType(cell);
+                    System.out.println(cellValue);
+                }
+            }
+        }
+    }
+
 
     /**
      * BufferedImage转byte[]
@@ -91,5 +175,19 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/pdf;charset=utf-8");
         response.setHeader("Content-disposition", "attachment; filename=".concat(String.valueOf(URLEncoder.encode(fileName.concat(".pdf"), "UTF-8"))));
+    }
+
+    private static String getRealType(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        String name = cell.getCellType().name();
+        if (CellType.STRING.name().contains(name)) {
+            return cell.getStringCellValue().toUpperCase();
+        }
+        if (CellType.NUMERIC.name().contains(name)) {
+            return String.valueOf(cell.getNumericCellValue());
+        }
+        return "";
     }
 }

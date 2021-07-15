@@ -17,4 +17,9 @@ public interface ExportDataService extends IService<ExportDataEntity> {
      * 将图片插入到word并导出
      */
     void exportWordWithImage(HttpServletResponse response) throws IOException, DocumentException;
+
+    /**
+     * 测试复杂的导入
+     */
+    void testImport() throws Exception;
 }

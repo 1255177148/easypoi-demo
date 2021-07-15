@@ -23,4 +23,9 @@ public class TestController {
     public void export(HttpServletResponse response) throws IOException, DocumentException {
         exportDataService.exportWordWithImage(response);
     }
+
+    @GetMapping("/test/import")
+    public void importData() throws Exception {
+        exportDataService.testImport();
+    }
 }
