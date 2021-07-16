@@ -19,6 +19,7 @@ import com.zhan.easypoi.demo.util.WordToPdfUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -36,6 +37,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -112,15 +115,16 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
         boolean rowStart1= false;
         boolean rowStart2 = false;
         int jumpNum = 0;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         while (rows.hasNext()){
             row = rows.next();
             if (row.getRowNum() < 2){
-                String rowValue = getRealType(row.getCell(1));
+                String rowValue = getRealType(row.getCell(1), format);
                 System.out.println(rowValue);
                 continue;
             }
             Cell cell1 = row.getCell(0);
-            String value = getRealType(cell1);
+            String value = getRealType(cell1, format);
             if ("学生1".equals(value)){
                 rowStart = true;
                 rowStart1= false;
@@ -147,9 +151,10 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
             while (cells.hasNext()){
                 if (rowStart || rowStart1 || rowStart2){
                     cell = cells.next();
-                    String cellValue = getRealType(cell);
+                    String cellValue = getRealType(cell, format);
                     System.out.println(cellValue);
                 }
+                num++;
             }
         }
     }
@@ -179,7 +184,7 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
         response.setHeader("Content-disposition", "attachment; filename=".concat(String.valueOf(URLEncoder.encode(fileName.concat(".pdf"), "UTF-8"))));
     }
 
-    private static String getRealType(Cell cell) {
+    private static String getRealType(Cell cell, SimpleDateFormat format) {
         if (cell == null) {
             return "";
         }
@@ -188,6 +193,10 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
             return cell.getStringCellValue().toUpperCase();
         }
         if (CellType.NUMERIC.name().contains(name)) {
+            if (DateUtil.isCellDateFormatted(cell)){
+                Date date = cell.getDateCellValue();
+                return format.format(date);
+            }
             return String.valueOf(cell.getNumericCellValue());
         }
         return "";
