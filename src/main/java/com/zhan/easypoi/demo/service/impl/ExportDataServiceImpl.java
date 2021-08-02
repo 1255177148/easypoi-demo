@@ -1,9 +1,6 @@
 package com.zhan.easypoi.demo.service.impl;
 
-import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
-import cn.afterturn.easypoi.excel.entity.result.ExcelImportResult;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -31,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +37,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -92,9 +87,9 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
         ImportParams params = new ImportParams();
         params.setHeadRows(2);
         params.setReadSingleCell(true);
-        ExcelImportResult<Map> list = ExcelImportUtil.importExcelMore(new File(filePath), Map.class, params);
-        Map<String, Object> map = list.getMap();
-        System.out.println(JSON.toJSONString(map));
+//        ExcelImportResult<Map> list = ExcelImportUtil.importExcelMore(new File(filePath), Map.class, params);
+//        Map<String, Object> map = list.getMap();
+//        System.out.println(JSON.toJSONString(map));
 
         InputStream inputStream = new FileInputStream(filePath);
         Workbook workbook = null;
@@ -115,12 +110,14 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
         boolean rowStart1= false;
         boolean rowStart2 = false;
         int jumpNum = 0;
+        int rowNum = 0;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         while (rows.hasNext()){
             row = rows.next();
             if (row.getRowNum() < 2){
                 String rowValue = getRealType(row.getCell(1), format);
                 System.out.println(rowValue);
+                rowNum++;
                 continue;
             }
             Cell cell1 = row.getCell(0);
@@ -143,7 +140,11 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
             }
             if (jumpNum != 0 && jumpNum > 0){
                 jumpNum--;
+                rowNum++;
                 continue;
+            }
+            if (rowNum == 4){
+                System.out.println("测试数据为：" + getRealType(row.getCell(1), format));
             }
             // 获取每行的单元格
             Iterator<Cell> cells = row.cellIterator();
@@ -156,6 +157,7 @@ public class ExportDataServiceImpl extends ServiceImpl<ExportDataMapper, ExportD
                 }
                 num++;
             }
+            rowNum++;
         }
     }
 
